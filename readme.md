@@ -1,1 +1,1 @@
-**_ Computational Methods Practice and Exploration Dump _**
+**Computational Methods Practice and Exploration Dump**
