@@ -1,11 +1,13 @@
 import random
 from collections import deque
 
+from gymnasium.wrappers.monitoring.video_recorder import VideoRecorder
 import gymnasium as gym
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
 import numpy as np
+import tensorflow as tf
 
 ENV_NAME = "CartPole-v1"
 
@@ -21,7 +23,7 @@ EXPLORATION_DECAY = 0.995
 
 
 class DQN:
-    def __init__(self, observation_space, action_space):
+    def __init__(self, action_space, model: Sequential):
         # Learning Parameters
         self.exploration_rate = EXPLORATION_MAX
 
@@ -30,11 +32,7 @@ class DQN:
         self.memory = deque(maxlen=MEMORY_SIZE)
 
         # Model <TODO try others
-        self.model = Sequential()
-        self.model.add(Dense(24, input_shape=(observation_space,), activation="relu"))
-        self.model.add(Dense(24, activation="relu"))
-        self.model.add(Dense(self.action_space, activation="linear"))
-        self.model.compile(loss="mse", optimizer=Adam(learning_rate=LEARNING_RATE))
+        self.model = model
 
     def remember(self, state, action, reward, next_state, done):
         # Append current environment to memory
@@ -62,33 +60,51 @@ class DQN:
         self.exploration_rate = max(EXPLORATION_MIN, self.exploration_rate)
 
 def cartpole():
+    return
 
+def cartpole_dqn():
+
+    # initialize environment
     env = gym.make(ENV_NAME, render_mode='human')
-    observation_space = env.observation_space.shape[0]
+    observation_space = env.observation_space.shape
     action_space = env.action_space.n
-    dqn_solver = DQN(observation_space, action_space)
-    run = 0
 
-    for _ in range(10):
-        run += 1
+    # configure model
+    model = Sequential([
+        tf.keras.layers.Input(shape=(1,)),
+        Dense(24, activation="relu"),
+        Dense(24, activation="relu"),
+        Dense(action_space, activation="linear"),
+    ])
+    model.compile(loss="mse", optimizer=Adam(learning_rate=LEARNING_RATE))
+
+    # construct solver object
+    dqn_solver = DQN(action_space, model)
+
+    after_training = "after_training.mp4"
+    video = VideoRecorder(env, after_training)
+
+    for run in range(10):
+        # initialize/reset state
         state = env.reset()
-        state = np.reshape(state[0], [1, observation_space]) #<here state[0]
-        step = 0
-        env.render()
-        while True:
-            step += 1
+
+        step = terminal = truncated = 0
+        while not (terminal or truncated):
             action = dqn_solver.act(state)
             state_next, reward, truncated, terminal, info = env.step(action)
             reward = reward if not (terminal or truncated) else -reward
-            state_next = np.reshape(state_next, [1, observation_space])
             dqn_solver.remember(state, action, reward, state_next, terminal)
             state = state_next
-            if terminal or truncated:
-                print("Run: " + str(run) + ", exploration: " + str(dqn_solver.exploration_rate) + ", score: " + str(step))
-                break
             dqn_solver.experience_replay()
+            step += 1
+
+        print("Run: " + str(run) + ", exploration: " +
+              str(dqn_solver.exploration_rate) + ", score: " + str(step))
+    
+    #video.close()
+    env.close()
 
 #TODO SETUP METRICS --- HOW TO EVALUATE?
 
 if __name__ == "__main__":
-    cartpole()
+    cartpole_dqn()
