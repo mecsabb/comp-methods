@@ -1,0 +1,9 @@
+gradio
+gym
+keras
+matplotlib
+numpy
+pandas
+sklearn
+torch
+torchvision
