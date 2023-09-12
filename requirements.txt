@@ -1,5 +1,0 @@
-gym
-keras
-matplotlib
-numpy
-pandas
