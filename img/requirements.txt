@@ -1,7 +1,4 @@
 gradio
-gym
-keras
-matplotlib
 numpy
 pandas
 sklearn

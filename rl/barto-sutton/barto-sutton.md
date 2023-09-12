@@ -1,0 +1,1 @@
+some scripts following "Reinforcement Learning, An Introduction" by Richard Sutton and Andrew Barto

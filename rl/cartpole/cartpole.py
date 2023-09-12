@@ -21,7 +21,6 @@ EXPLORATION_MAX = 1.0
 EXPLORATION_MIN = 0.01
 EXPLORATION_DECAY = 0.995
 
-
 class DQN:
     def __init__(self, action_space, model: Sequential):
         # Learning Parameters
@@ -100,7 +99,7 @@ def cartpole_dqn():
 
         print("Run: " + str(run) + ", exploration: " +
               str(dqn_solver.exploration_rate) + ", score: " + str(step))
-    
+
     #video.close()
     env.close()
 
